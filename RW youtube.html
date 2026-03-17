@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RWYouTube</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0fca;
+      --surface: #1a1a1a;
+      --surface2: #272727;
+      --border: #303030;
+      --text: #f1f1f1;
+      --text-muted: #aaa;
+      --red: #ff0000;
+      --hover: rgba(255,255,255,0.08);
+      --sidebar-w: 240px;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .menu-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--text); padding: 8px; border-radius: 50%;
+      transition: background .2s;
+    }
+    .menu-btn:hover { background: var(--hover); }
+    .menu-btn .material-icons { font-size: 22px; }
+
+    .logo { display: flex; align-items: center; gap: 2px; text-decoration: none; }
+    .logo-icon {
+      background: var(--red); border-radius: 6px;
+      width: 34px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { width: 18px; height: 14px; fill: white; }
+    .logo-text {
+      font-size: 18px; font-weight: 700; color: var(--text);
+      letter-spacing: -0.5px; margin-left: 4px;
+    }
+    .logo-country {
+      font-size: 9px; color: var(--text-muted);
+      vertical-align: super; margin-left: 1px;
+    }
+
+    .topbar-center { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 640px; }
+    .search-form {
+      display: flex; flex: 1;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      overflow: hidden;
+    }
+    .search-input {
+      flex: 1; background: var(--surface); color: var(--text);
+      border: none; outline: none;
+      padding: 0 16px; font-size: 16px;
+      border-radius: 40px 0 0 40px;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-btn {
+      width: 64px; background: var(--surface2);
+      border: none; cursor: pointer; color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 0 40px 40px 0;
+      border-left: 1px solid var(--border);
+      transition: background .2s;
+    }
+    .search-btn:hover { background: #3a3a3a; }
+    .mic-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--surface2); border: none;
+      cursor: pointer; color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .mic-btn:hover { background: var(--hover); }
+
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--text); width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s; position: relative;
+    }
+    .icon-btn:hover { background: var(--hover); }
+    .create-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: none; cursor: pointer;
+      color: var(--text); padding: 8px 16px; border-radius: 20px;
+      font-size: 14px; font-weight: 500; transition: background .2s;
+    }
+    .create-btn:hover { background: var(--hover); }
+    .create-btn .material-icons { font-size: 20px; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #e040fb);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+
+    
+    .layout { display: flex; padding-top: 56px; }
+
+    
+    .sidebar {
+      width: var(--sidebar-w); position: fixed;
+      top: 56px; left: 0; bottom: 0;
+      overflow-y: auto; background: var(--bg);
+      padding: 12px 0;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 24px;
+      padding: 10px 24px; cursor: pointer; border-radius: 10px;
+      margin: 0 8px; transition: background .15s;
+      font-size: 14px; text-decoration: none; color: var(--text);
+    }
+    .nav-item:hover { background: var(--hover); }
+    .nav-item.active { background: var(--surface2); font-weight: 500; }
+    .nav-item .material-icons { font-size: 22px; flex-shrink: 0; }
+
+    .sidebar-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 12px 0;
+    }
+    .sidebar-section-title {
+      padding: 8px 24px; font-size: 14px; font-weight: 500; color: var(--text);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sidebar-section-title .material-icons { font-size: 18px; cursor: pointer; }
+
+    .sub-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 8px 24px; cursor: pointer; border-radius: 10px;
+      margin: 0 8px; transition: background .15s;
+      font-size: 13.5px; color: var(--text); text-decoration: none;
+      position: relative;
+    }
+    .sub-item:hover { background: var(--hover); }
+    .sub-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      flex-shrink: 0; object-fit: cover;
+    }
+    .sub-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--red); position: absolute; left: 44px; top: 8px;
+    }
+
+    
+    .main { margin-left: var(--sidebar-w); flex: 1; padding: 24px 24px 40px; }
+
+    
+    .chips {
+      display: flex; gap: 8px; overflow-x: auto;
+      padding-bottom: 16px; scrollbar-width: none;
+    }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      flex-shrink: 0; padding: 6px 14px;
+      border-radius: 8px; background: var(--surface2);
+      border: none; color: var(--text);
+      font-size: 14px; cursor: pointer; transition: background .15s;
+      white-space: nowrap;
+    }
+    .chip:hover { background: #3a3a3a; }
+    .chip.active { background: var(--text); color: var(--bg); font-weight: 500; }
+
+   
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px 12px;
+    }
+
+    .card { cursor: pointer; }
+    .thumb-wrap {
+      position: relative; border-radius: 12px; overflow: hidden;
+      aspect-ratio: 16/9; background: var(--surface2);
+    }
+    .thumb-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .3s ease;
+    }
+    .card:hover .thumb-wrap img { transform: scale(1.03); }
+    .duration {
+      position: absolute; bottom: 8px; right: 8px;
+      background: rgba(0,0,0,.8); color: #fff;
+      font-size: 12px; font-weight: 500;
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .badge {
+      position: absolute; bottom: 8px; left: 8px;
+      background: rgba(0,0,0,.75); color: #aaa;
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      border: 1px solid rgba(255,255,255,.15);
+    }
+
+    .card-meta { display: flex; gap: 12px; padding: 10px 0 4px; }
+    .channel-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      flex-shrink: 0; object-fit: cover;
+      background: linear-gradient(135deg, #f09819, #ff512f);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: white;
+    }
+
+    .card-info { flex: 1; min-width: 0; }
+    .card-title {
+      font-size: 14px; font-weight: 500; line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .card-channel {
+      font-size: 13px; color: var(--text-muted); margin-bottom: 2px;
+    }
+    .card-stats { font-size: 13px; color: var(--text-muted); }
+    .card-more {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); padding: 4px;
+      border-radius: 50%; opacity: 0; transition: opacity .2s, background .2s;
+      align-self: flex-start; margin-top: -2px;
+    }
+    .card:hover .card-more { opacity: 1; }
+    .card-more:hover { background: var(--hover); color: var(--text); }
+
+    
+    .av-1 { background: linear-gradient(135deg, #f09819, #ff512f); }
+    .av-2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+    .av-3 { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+    .av-4 { background: linear-gradient(135deg, #cc2b5e, #753a88); }
+    .av-5 { background: linear-gradient(135deg, #f7971e, #ffd200); }
+    .av-6 { background: linear-gradient(135deg, #56ab2f, #a8e063); }
+  </style>
+</head>
+<body>
+ 
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="menu-btn"><span class="material-icons">menu</span></button>
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 90 60" xmlns="http://www.w3.org/2000/svg">
+          <path d="M36 42V18l24 12z"/>
+        </svg>
+      </div>
+      <span class="logo-text">YouTube<span class="logo-country">NG</span></span>
+    </a>
+  </div>
+
+  <div class="topbar-center">
+    <form class="search-form" onsubmit="return false">
+      <input class="search-input" type="text" placeholder="Search"/>
+      <button class="search-btn" type="submit">
+        <span class="material-icons">search</span>
+      </button>
+    </form>
+    <button class="mic-btn"><span class="material-icons">mic</span></button>
+  </div>
+
+  <div class="topbar-right">
+    <button class="create-btn">
+      <span class="material-icons">add</span> Create
+    </button>
+    <button class="icon-btn"><span class="material-icons">notifications</span></button>
+    <div class="avatar">U</div>
+  </div>
+</header>
+
+<!-- ══ LAYOUT ══════════════════════════════════════════ -->
+<div class="layout">
+
+  <!-- ── SIDEBAR ──────────────────────────────────────── -->
+  <nav class="sidebar">
+    <a class="nav-item active" href="#">
+      <span class="material-icons">home</span> Home
+    </a>
+    <a class="nav-item" href="#">
+      <span class="material-icons">slideshow</span> Shorts
+    </a>
+
+    <hr class="sidebar-divider"/>
+
+    <div class="sidebar-section-title">
+      Subscriptions <span class="material-icons">expand_more</span>
+    </div>
+
+    <a class="sub-item" href="#">
+      <div class="channel-avatar av-1">C</div>
+      <span>Carterefe</span>
+      <div class="sub-dot"></div>
+    </a>
+    <a class="sub-item" href="#">
+      <div class="channel-avatar av-2">J</div>
+      <span>Richard</span>
+    </a>
+    <a class="sub-item" href="#">
+      <div class="channel-avatar av-3">S</div>
+      <span>SIAN SPORTS</span>
+    </a>
+    <a class="sub-item" href="#">
+      <div class="channel-avatar av-4">J</div>
+      <span>JeaFx</span>
+      <div class="sub-dot"></div>
+    </a>
+    <a class="sub-item" href="#">
+      <div class="channel-avatar av-5">B</div>
+      <span>Bionic</span>
+      <div class="sub-dot"></div>
+    </a>
+    <a class="sub-item" href="#">
+      <div class="channel-avatar av-6" style="font-size:12px">MB</div>
+      <span>MrBeast</span>
+      <div class="sub-dot"></div>
+    </a>
+    <a class="sub-item" href="#">
+      <div class="channel-avatar av-1">B</div>
+      <span>official BRODA S…</span>
+      <div class="sub-dot"></div>
+    </a>
+    <a class="sub-item" href="#">
+      <span class="material-icons" style="font-size:26px;color:var(--text-muted)">expand_more</span>
+      <span style="color:var(--text-muted)">Show more</span>
+    </a>
+
+    <hr class="sidebar-divider"/>
+
+    <div class="sidebar-section-title">You <span class="material-icons">chevron_right</span></div>
+    <a class="nav-item" href="#">
+      <span class="material-icons">history</span> History
+    </a>
+    <a class="nav-item" href="#">
+      <span class="material-icons">playlist_play</span> Playlists
+    </a>
+    <a class="nav-item" href="#">
+      <span class="material-icons">watch_later</span> Watch Later
+    </a>
+    <a class="nav-item" href="#">
+      <span class="material-icons">thumb_up</span> Liked videos
+    </a>
+  </nav>
+
+  <!-- ── MAIN ─────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Filter chips -->
+    <div class="chips">
+      <button class="chip active">All</button>
+      <button class="chip">Basketball</button>
+      <button class="chip">NBA</button>
+      <button class="chip">Forex trading</button>
+      <button class="chip">3-Point Contest</button>
+      <button class="chip">Slam Dunk</button>
+      <button class="chip">Highlights</button>
+      <button class="chip">Boxing</button>
+      <button class="chip">Comedy</button>
+      <button class="chip">Investing</button>
+      <button class="chip">Music</button>
+      <button class="chip">Gaming</button>
+      <button class="chip">News</button>
+    </div>
+
+    <!-- Video Grid -->
+    <div class="grid">
+
+      <!-- Card 1 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="Special Date"/>
+          <span class="duration">32:19</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-1">B</div>
+          <div class="card-info">
+            <div class="card-title">SPECIAL DATE | Broda Shaggi | Dorathy | Sheggz |…</div>
+            <div class="card-channel">official BRODA SHAGGI</div>
+            <div class="card-stats">304k views · 6 days ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/3hqFNUMEMiE/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="3pt"/>
+          <span class="duration">13:25</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-3">N</div>
+          <div class="card-info">
+            <div class="card-title">#MtnDew3PT Contest Full Highlights | 2021…</div>
+            <div class="card-channel">NBA</div>
+            <div class="card-stats">15m views · 5 years ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/oqMl5CRoFdk/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="3pt contest"/>
+          <span class="duration">20:10</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-3">N</div>
+          <div class="card-info">
+            <div class="card-title">FULL 2021 NBA 3-Point Contest | NBA Classic</div>
+            <div class="card-channel">NBA</div>
+            <div class="card-stats">649k views · 1 month ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/sZa9UHRSrJw/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="IC Markets"/>
+          <span class="duration">10:36</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-4" style="font-size:12px">SA</div>
+          <div class="card-info">
+            <div class="card-title">IC Markets Review For Beginners</div>
+            <div class="card-channel">SA Shares</div>
+            <div class="card-stats">30k views · 4 years ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/2VevuDFpCGs/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="Forex"/>
+          <span class="duration">31:09</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-5">J</div>
+          <div class="card-info">
+            <div class="card-title">Forex Trading For Beginners (FULL COURSE)</div>
+            <div class="card-channel">JeaFx</div>
+            <div class="card-stats">527k views · 2 years ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/K4NRJoCNHIs/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="Steph vs Klay"/>
+          <span class="duration">25:56</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-3">N</div>
+          <div class="card-info">
+            <div class="card-title">Steph vs. Klay | FULL 2016 NBA 3-Point Contest | NBA…</div>
+            <div class="card-channel">NBA</div>
+            <div class="card-stats">4.4m views · 1 year ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 7 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/pQdoSLj6wAs/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="Slam Dunk"/>
+          <span class="duration">18:38</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-3">N</div>
+          <div class="card-info">
+            <div class="card-title">The FULL 2026 NBA AT&T Slam Dunk! 👀👀</div>
+            <div class="card-channel">NBA</div>
+            <div class="card-stats">2.1m views · 3 weeks ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 8 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/P3rVwWqiDEA/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="Stephen vs Sabrina"/>
+          <span class="duration">5:07</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-3">N</div>
+          <div class="card-info">
+            <div class="card-title">The FULL Stephen vs. Sabrina 3-Point Challenge |…</div>
+            <div class="card-channel">NBA</div>
+            <div class="card-stats">5.1m views · 2 years ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 9 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/VKc7ItXPjPQ/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="Wolves vs Grizzlies"/>
+          <span class="duration">9:52</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-6" style="font-size:11px">GT</div>
+          <div class="card-info">
+            <div class="card-title">Minnesota Timberwolves vs Memphis Grizzlies Full Gam…</div>
+            <div class="card-channel">GAMETIME HIGHLIGHTS</div>
+            <div class="card-stats">90k views · 10 days ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 10 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/xcAMCNcbJyA/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="Boxing"/>
+          <span class="duration">29:59</span>
+          <span class="badge">Downloaded</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-1">C</div>
+          <div class="card-info">
+            <div class="card-title">Day 2 Of Boxing Training For The Fight With Portable…</div>
+            <div class="card-channel">Carterefe</div>
+            <div class="card-stats">24k views · 7 days ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 11 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/LqSXgLUIM_c/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="LAL vs NYK"/>
+          <span class="duration">8:59</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-3">N</div>
+          <div class="card-info">
+            <div class="card-title">Lakers vs Knicks Full Game Highlights | March 8, 2026</div>
+            <div class="card-channel">NBA</div>
+            <div class="card-stats">1.2m views · 6 days ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 12 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/mmFNkKU0OoU/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="DEN vs UTA"/>
+          <span class="duration">9:47</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-3">N</div>
+          <div class="card-info">
+            <div class="card-title">Nuggets vs Jazz Full Game Highlights | March 2, 2026</div>
+            <div class="card-channel">NBA</div>
+            <div class="card-stats">890k views · 12 days ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 13 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/N4bFDtXQ6Y4/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="BOS vs MIL"/>
+          <span class="duration">9:52</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-3">N</div>
+          <div class="card-info">
+            <div class="card-title">Celtics vs Bucks Full Game Highlights | March 2, 2026</div>
+            <div class="card-channel">NBA</div>
+            <div class="card-stats">1.5m views · 12 days ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 14 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/ZnXFX5XjhKI/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="3pt 2026"/>
+          <span class="duration">16:18</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-3">N</div>
+          <div class="card-info">
+            <div class="card-title">2026 NBA All-Star 3-Point Contest Full Highlights</div>
+            <div class="card-channel">NBA</div>
+            <div class="card-stats">3.2m views · 3 weeks ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+      <!-- Card 15 -->
+      <div class="card">
+        <div class="thumb-wrap">
+          <img src="https://i.ytimg.com/vi/OTNKfkdFjkQ/hqdefault.jpg"
+               onerror="this.src='https://via.placeholder.com/480x270/1a1a1a/555?text=Video'" alt="long video"/>
+          <span class="duration">1:48:26</span>
+        </div>
+        <div class="card-meta">
+          <div class="channel-avatar av-2">S</div>
+          <div class="card-info">
+            <div class="card-title">Full Game Replay | Conference Finals 2026</div>
+            <div class="card-channel">SIAN SPORTS</div>
+            <div class="card-stats">780k views · 2 weeks ago</div>
+          </div>
+          <button class="card-more"><span class="material-icons" style="font-size:20px">more_vert</span></button>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+  </main>
+
+</div><!-- /layout -->
+
+<script>
+  // Chip toggle
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
